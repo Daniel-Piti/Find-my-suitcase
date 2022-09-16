@@ -1,0 +1,39 @@
+{
+    "fullName"  : "Daniel Pitimson",
+    "email"     : "Danielpiti@gmail.com",
+    "password"  : "AAA123",
+    "suitCases" : [
+        {
+            "QR" : "test1",
+            "massages" : [
+                {
+                    "date"      : "14.2.2022",
+                    "massage"   : "Hey I fould your baggage!",
+                    "location"  : "London",
+                    "latitude"  : "12",
+                    "longitude" : "33"
+                },
+                {
+                    "date"      : "14.2.2022",
+                    "massage"   : "Hey I fould your baggage!",
+                    "location"  : "London",
+                    "latitude"  : "12",
+                    "longitude" : "33"
+                }
+            ]
+        },
+        {
+            "QR" : "test2",
+            "massages" : [
+                {
+                    "mate"      : "3.1.2020",
+                    "massage"   : "Hey I fould your baggage!",
+                    "location"  : "LA",
+                    "latitude"  : "21",
+                    "longitude" : "14"
+                }
+            ]
+        }
+    ]
+
+}
