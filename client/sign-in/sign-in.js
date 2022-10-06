@@ -7,8 +7,7 @@ form.addEventListener('submit', async e => {
     const email    = form.email.value
     const password = form.password.value
 
-    document.getElementById("email-error").textContent    = ''
-    document.getElementById("password-error").textContent = ''
+    document.getElementById("error-text").textContent = ''
 
     try {
         const res = await fetch('/sign-in', {
@@ -16,11 +15,10 @@ form.addEventListener('submit', async e => {
             body: JSON.stringify({ email, password }),
             headers: { 'Content-Type' : 'application/json' }
         })
-
-        const data = await res.json()
-        if(data.errors) {
-            document.getElementById("email-error").textContent    = data.errors.email
-            document.getElementById("password-error").textContent = data.errors.password
+        
+        const data  = await res.json()
+        if(data.error) {
+            document.getElementById("error-text").textContent = data.error
         }
         else if(data.user) {
             location.assign('/')
