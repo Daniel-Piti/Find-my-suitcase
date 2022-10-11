@@ -1,11 +1,18 @@
 const mongoose  = require('mongoose')
 
 const messageSchema = new mongoose.Schema({
-    massage: {
-        type: String
+    date: {
+        type: Date,
+        required: true
+    },
+    location: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true
     }
 })
 
-const Message = mongoose.model('message', messageSchema)
-
-module.exports = Message;
+module.exports = messageSchema;

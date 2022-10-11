@@ -4,6 +4,7 @@ const jwt          = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
 const User = require('./server/User')
+const SuitCase = require('./server/SuitCase')
 
 // init app & middleware
 const app = express()
@@ -12,7 +13,7 @@ app.use(express.static(__dirname + '/client'))
 app.use(cookieParser())
 
 const port = 3000
-const secret = 'LEE SIN'
+const SECRET = 'LEE SIN'
 const maxAge = 3 * 24 * 60 * 60;
 
 // FUNCTIONS
@@ -51,7 +52,7 @@ const handleErrors = (err) => {
 const requireAuth = (req, res, next) => {
     const token = req.cookies.jwt
     if(token){
-        jwt.verify(token, secret, (err, docodedToken) => {
+        jwt.verify(token, SECRET, (err, docodedToken) => {
             if(err){
                 console.log(err.message)
                 res.redirect('/sign-in')
@@ -68,13 +69,33 @@ const requireAuth = (req, res, next) => {
 }
 
 const createToken = id => {
-    return jwt.sign({ id }, secret, {
+    return jwt.sign({ id }, SECRET, {
         expiresIn: maxAge
     })
 }
 
-const getUser = cookie => {
-    return "Nana"
+const getUser = async (token) => {
+    try {
+        let decodedToken = jwt.verify(token, SECRET)
+        let user = await User.findById(decodedToken.id)
+        return user
+    }
+    catch (err) {
+        return null
+    }
+}
+
+const getCleanSuitcases = (data) => {
+    let suitcases = data._doc.suitcases
+    suitcases.forEach(suitcase => {
+        delete suitcase._doc._id
+        delete suitcase._doc.__v
+        suitcase._doc.massages.forEach(message => {
+            delete message._doc._id
+            delete message._doc.__v
+        })
+    })
+    return suitcases
 }
 
 // connect to DB
@@ -90,10 +111,22 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/client/home/home.html')
 })
 
-app.get('/get-name', (req, res) => {
-    const name = getUser(req.cookies.jwt)
-    console.log(name)
-    res.status(201).json({ name })
+app.get('/get-name', async (req, res) => {
+    let name = null
+    try {
+        let decodedToken = jwt.verify(req.cookies.jwt, SECRET)
+        let user = await User.findById(decodedToken.id)
+        if(user.name){
+            name = user.name.toLowerCase()
+        }
+    }
+    catch(err){        
+        console.log(err.message)
+    }
+    if(name === null)
+        res.status(404).json({name : ''})
+    else
+        res.status(201).json({ name })
 })
 
 app.get('/sign-in', (req, res) => {
@@ -107,6 +140,10 @@ app.get('/sign-up', (req, res) => {
 app.get('/my-suitcases', requireAuth, (req, res) => {
     console.log("dude")
     res.sendFile(__dirname + '/client/my-suitcases/my-suitcases.html')
+})
+
+app.get('/write-message', (req, res) => {
+    res.sendFile(__dirname + '/client/write-message/write-message.html')
 })
 
 app.post('/sign-up', async (req, res) => {
@@ -126,7 +163,7 @@ app.post('/sign-up', async (req, res) => {
 
 app.post('/sign-in', async (req, res) =>{
     const { email, password } = req.body
-
+    console.log(email, password)
     try {
         const user = await User.login(email, password)
         const token = createToken(user._id)
@@ -141,11 +178,53 @@ app.post('/sign-in', async (req, res) =>{
     }
 })
 
-app.get('/sign-out', (req, res) =>{
+app.get('/sign-out', (req, res) => {
     res.cookie('jwt', '', { maxAge: 1 })
     res.redirect('/')
 })
 
-app.use((req, res, next) => {
+app.post('/add-message', async (req, res) => {
+    const { location, message, QR } = req.body
+    console.log(location, message, QR)
+    let date = Date.now()
+    try {
+        let suitcase = await SuitCase.findOne({ qr : QR})
+        suitcase.massages.push({date, location, message})
+        suitcase.save()
+        console.log(suitcase)
+        res.status(201).json({ status : "OK" })
+    }
+    catch (err) {
+        res.status(400).json({ status : "ERROR" })
+    }
+})
+
+app.get('/add-suitcase', async (req, res) => {
+    let QR = Math.random(10)
+
+    try {
+        let decodedToken = jwt.verify(req.cookies.jwt, SECRET)
+
+        const suitcase  = await SuitCase.create({ qr : QR })
+        let doc =  await User.findOneAndUpdate({_id : decodedToken.id}, { $push : { suitcases: suitcase }})
+        console.log("Suitcases added")
+        res.status(201).json({ doc })
+    }
+    catch (err) {
+        const errors = handleErrors(err)
+        res.status(400).json({ errors })
+    }
+})
+
+
+
+app.get('/get-suitcases', async (req, res) => {
+    let user = await getUser(req.cookies.jwt)
+    let suitcases = getCleanSuitcases(await user.populate('suitcases'))
+    console.log(suitcases)
+    res.status(201).json(suitcases)
+})
+
+app.use((req, res) => {
     res.status(404).sendFile(__dirname + '/client/not-found/not-found.html')
 })

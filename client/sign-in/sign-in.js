@@ -6,7 +6,7 @@ form.addEventListener('submit', async e => {
     // Reset errors
     const email    = form.email.value
     const password = form.password.value
-
+    console.log(email, password)
     document.getElementById("error-text").textContent = ''
 
     try {

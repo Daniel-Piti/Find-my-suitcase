@@ -3,13 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
     <link rel="icon" href="/favicon.ico">
 
     <title>Sign up</title>
-
-    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/">
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -19,7 +15,25 @@
   </head>
 
   <body class="text-center">
-    <form class="form-signin card">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="/">
+          <img src="../favicon.ico" width="30" height="30" class="d-inline-block align-top">
+        </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-link" href="/sign-in"      >Sign in</a>
+          <a class="nav-link" href="/sign-up"      >Sign up</a>
+          <a class="nav-link" href="/my-suitcases">My suitcases</a>
+          <a class="nav-link" href="/write-message">I found a suitcase!</a>
+          <a class="nav-link" href="/sign-out"     >Sign out</a>
+        </div>
+      </div>
+    </nav>
+
+    <form class="form-signup card center-card">
       <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
       <input type="text"  class="form-control" placeholder="Full name"     name="name" value="Perez"           required autofocus>
       <div id="name-error" class="error-text"></div>
@@ -27,12 +41,15 @@
       <div id="email-error" class="error-text"></div>
       <input type="password" id="inputPassword" class="form-control" placeholder="Password"      name="password" value="123456"      required>
       <div id="password-error" class="error-text"></div>
-      <button class="btn btn-lg btn-sign btn-primary btn-block" type="submit">Sign up</button>
-      <!-- need to b moved -->
-      <a href="/sign-in/sign-in.html">Sign in</a>
-      <p class="mt-5 mb-3 text-muted">&copy; 2017-2022</p>
+      <button class="btn btn-lg form-control btn-primary btn-block" type="submit">Sign up</button>
+      <a class="sign-in-btn" href="/sign-in/sign-in.html">Sign in</a>
+      <p class="mt-4 text-muted">&copy; 2017-2022</p>
     </form>
-    <a href="/home/home.html" class="btn btn-lg btn-primary btn-block back-to-main" type="submit">Back to home page</a>
+
     <script src="sign-up.js"></script>
+
+    <!-- Bootstrap stuff -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
 </html>

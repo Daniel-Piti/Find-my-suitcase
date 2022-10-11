@@ -3,11 +3,11 @@ const form = document.querySelector('form')
 form.addEventListener('submit', async e => {
     e.preventDefault()
 
-    // Reset errors
     const name     = form.name.value
     const email    = form.email.value
     const password = form.password.value
 
+    // Reset errors
     document.getElementById("name-error").textContent     = ''
     document.getElementById("email-error").textContent    = ''
     document.getElementById("password-error").textContent = ''

@@ -1,16 +1,18 @@
 const mongoose  = require('mongoose')
 
-const suitCaseSchema = new mongoose.Schema({
+const messageSchema = require('./Message')
+
+const suitcaseSchema = new mongoose.Schema({
     qr: {
         type: String,
+        unique: true,
         required: [true, 'Please enter a QR code']
     },
-    massages: {
-        type: Array,
-        default: []
-    }
+    massages: [{
+        type : messageSchema
+    }]
 })
 
-const SuitCase = mongoose.model('suitCase', suitCaseSchema)
+const Suitcase = mongoose.model('suitcases', suitcaseSchema)
 
-module.exports = SuitCase;
+module.exports = Suitcase;

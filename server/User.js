@@ -15,9 +15,10 @@ const userSchema = new mongoose.Schema({
         lowercase: true.valueOf,
         validate: [ isEmail , 'Please enter a valid name']
     },
-    suitcases: {
-        type: Array
-    },
+    suitcases: [{
+        type : mongoose.Schema.Types.ObjectId,
+        ref  : 'suitcases'
+    }],
     password: {
         type: String,
         required: [true, 'Please enter a password'],

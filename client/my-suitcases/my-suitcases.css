@@ -1,0 +1,39 @@
+body {
+    background-color: #f5f5f5;
+    text-align: center;
+  }
+  
+  nav {
+    z-index: 10;
+  }
+  
+  img {
+    margin: 0 10px;
+  }
+  
+  a {
+    margin: 0 10px;
+  }
+
+  h1 {
+    margin-top: 20px;
+  }
+
+  ul {
+    text-align: center;
+    list-style: inside;
+    list-style-type: none;
+    position:relative;
+    right: 8%;
+  }
+  
+  .card {
+    margin: 10px;
+    text-align: center;
+    width: 18rem;
+    border-radius: 20px;
+  }
+
+  .btn {
+    width: 200px;
+  }
