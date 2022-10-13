@@ -123,6 +123,7 @@ app.get('/get-name', async (req, res) => {
     catch(err){        
         console.log(err.message)
     }
+    
     if(name === null)
         res.status(404).json({name : ''})
     else
@@ -206,9 +207,9 @@ app.get('/add-suitcase', async (req, res) => {
         let decodedToken = jwt.verify(req.cookies.jwt, SECRET)
 
         const suitcase  = await SuitCase.create({ qr : QR })
-        let doc =  await User.findOneAndUpdate({_id : decodedToken.id}, { $push : { suitcases: suitcase }})
-        console.log("Suitcases added")
-        res.status(201).json({ doc })
+        let doc =  await User.findOneAndUpdate({_id : decodedToken.id}, { $push : { suitcases: suitcase }}, { new : true })
+        console.log(suitcase)
+        res.status(201).json(suitcase)
     }
     catch (err) {
         const errors = handleErrors(err)
@@ -216,13 +217,38 @@ app.get('/add-suitcase', async (req, res) => {
     }
 })
 
+app.post('/remove-suitcase', async (req, res) => {
+    let QR = req.body.QR
 
+    try {
+        let user = await getUser(req.cookies.jwt)
+        if(user !== null) {
+            let suitcase = await SuitCase.findOne({ qr : QR})
+            let doc =  await User.findOneAndUpdate({_id : user.id}, { $pull : { suitcases: suitcase.id } }, { new : true })
+            if(user.suitcases.length - doc.suitcases.length === 1){
+                console.log("Suitcase deleted - " + suitcase.id)
+                res.status(200).json({status : "OK"})
+            }
+            else {
+                res.status(400).json({status : "ERROR"})
+            }
+        }
+    }
+    catch (err) {
+        res.status(400).json({ status : "ERROR" })
+    }
+})
 
 app.get('/get-suitcases', async (req, res) => {
     let user = await getUser(req.cookies.jwt)
-    let suitcases = getCleanSuitcases(await user.populate('suitcases'))
-    console.log(suitcases)
-    res.status(201).json(suitcases)
+    if(user !== null){
+        let suitcases = getCleanSuitcases(await user.populate('suitcases'))
+        console.log(suitcases)
+        res.status(201).json(suitcases)
+    }
+    else {
+        res.status(400).json({ name: "not connected" })
+    }
 })
 
 app.use((req, res) => {

@@ -24,7 +24,6 @@ function addSuitcasesCards(suitcases){
 }
 
 function buildSuitcaseCard(suitcase){
-    console.log(suitcase)
     let div = document.createElement('div')
     div.classList.add('card')
     let divBody = document.createElement('div')
@@ -52,9 +51,19 @@ function buildSuitcaseCard(suitcase){
         ul.appendChild(li)
     }
 
+    let btn  = document.createElement('button')
+    btn.classList.add('btn')
+    btn.classList.add('btn-danger')
+    btn.value = suitcase.qr
+    btn.innerHTML = 'Remove'
+
+    btn.addEventListener('click', function(){ removeSuitcase(this) })
+    
     divBody.appendChild(h5)
     divBody.appendChild(ul)
+    divBody.append(btn)
     div.appendChild(divBody)
+
     return div
 }
 
@@ -64,8 +73,28 @@ addBtn.addEventListener('click', addSuitcase)
 async function addSuitcase() {
     try {
         const obj = await fetch('/add-suitcase')
-        const data = await obj.json()
-        console.log(data)
+        const suitcase = await obj.json()
+        console.log(suitcase)
+        container.appendChild(buildSuitcaseCard(suitcase))
+    }
+    catch(err){
+        console.log(err)
+    }
+}
+
+async function removeSuitcase(btn) {
+    let QR = btn.value
+    console.log(QR)
+    try {
+        const obj = await fetch('/remove-suitcase', {
+            method: 'POST',
+            body: JSON.stringify({ QR }),
+            headers: { 'Content-Type' : 'application/json' }
+        })
+        const res = await obj.json()
+        if(res.status === "OK"){
+            container.removeChild(btn.parentNode.parentNode)
+        }
     }
     catch(err){
         console.log(err)
