@@ -5,7 +5,7 @@ async function getSuitcases() {
         const obj = await fetch('/get-suitcases')
 
         const data = await obj.json()
-
+        console.log(data)
         addSuitcasesCards(data)
     }
     catch(err){
@@ -31,7 +31,11 @@ function buildSuitcaseCard(suitcase){
 
     let h5  = document.createElement('h5')
     h5.classList.add('card-title')
-    h5.innerHTML = suitcase.qr
+    h5.innerHTML = suitcase.name
+
+    let qrImg = document.createElement('img')
+    qrImg.src = suitcase.qr
+
     let ul = document.createElement('ul')
 
     if(suitcase.massages.length > 0) {
@@ -54,12 +58,13 @@ function buildSuitcaseCard(suitcase){
     let btn  = document.createElement('button')
     btn.classList.add('btn')
     btn.classList.add('btn-danger')
-    btn.value = suitcase.qr
+    btn.value = suitcase._id
     btn.innerHTML = 'Remove'
 
     btn.addEventListener('click', function(){ removeSuitcase(this) })
     
     divBody.appendChild(h5)
+    divBody.appendChild(qrImg)
     divBody.appendChild(ul)
     divBody.append(btn)
     div.appendChild(divBody)
@@ -71,11 +76,22 @@ let addBtn = document.getElementById('add-suitcase')
 addBtn.addEventListener('click', addSuitcase)
 
 async function addSuitcase() {
+    let suitcaseName = document.getElementById("suitcase-name").value
+    if(suitcaseName === "")
+        return
+    console.log(suitcaseName)
+
     try {
-        const obj = await fetch('/add-suitcase')
+        const obj = await fetch('/add-suitcase', {
+            method: 'POST',
+            body: JSON.stringify({ suitcaseName }),
+            headers: { 'Content-Type' : 'application/json' }
+        })
         const suitcase = await obj.json()
-        console.log(suitcase)
-        container.appendChild(buildSuitcaseCard(suitcase))
+        console.log("here" + suitcase._id)
+        if(suitcase != null){
+            container.appendChild(buildSuitcaseCard(suitcase))
+        }
     }
     catch(err){
         console.log(err)
@@ -83,12 +99,13 @@ async function addSuitcase() {
 }
 
 async function removeSuitcase(btn) {
-    let QR = btn.value
-    console.log(QR)
+    btn.disabled = true;
+    let suitcaseID = btn.value
+    console.log(suitcaseID)
     try {
         const obj = await fetch('/remove-suitcase', {
             method: 'POST',
-            body: JSON.stringify({ QR }),
+            body: JSON.stringify({ suitcaseID }),
             headers: { 'Content-Type' : 'application/json' }
         })
         const res = await obj.json()
@@ -99,4 +116,5 @@ async function removeSuitcase(btn) {
     catch(err){
         console.log(err)
     }
+    btn.disabled = false
 }

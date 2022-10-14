@@ -29,3 +29,15 @@ form.addEventListener('submit', async e => {
         console.log(err)
     }
 })
+
+function setParams() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let id = urlParams.get('id')
+    console.log(id)
+    if(id !== null){
+        document.getElementById('QR-input').value = id
+    }
+}
+
+setParams()

@@ -3,10 +3,9 @@ const mongoose  = require('mongoose')
 const messageSchema = require('./Message')
 
 const suitcaseSchema = new mongoose.Schema({
-    qr: {
+    name: {
         type: String,
-        unique: true,
-        required: [true, 'Please enter a QR code']
+        required: [true, 'Please enter a name for your suitcase']
     },
     massages: [{
         type : messageSchema

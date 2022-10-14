@@ -3,6 +3,8 @@ const mongoose     = require('mongoose')
 const jwt          = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
+const QRCode = require("qrcode");
+
 const User = require('./server/User')
 const SuitCase = require('./server/SuitCase')
 
@@ -85,22 +87,29 @@ const getUser = async (token) => {
     }
 }
 
-const getCleanSuitcases = (data) => {
+const getQR = async (id) => {
+    let url = 'localhost:3000/write-message?id=' + id
+    let qr = await QRCode.toDataURL(url)
+    return qr
+}
+
+const getCleanSuitcases = async (data) => {
     let suitcases = data._doc.suitcases
-    suitcases.forEach(suitcase => {
-        delete suitcase._doc._id
+    await Promise.all(suitcases.map(async suitcase => {
+        let qr = await getQR(suitcase._id)
+        suitcase._doc.qr = qr
         delete suitcase._doc.__v
         suitcase._doc.massages.forEach(message => {
             delete message._doc._id
             delete message._doc.__v
         })
-    })
+    }))
     return suitcases
 }
 
 // connect to DB
 const dbURI = 'mongodb+srv://danielpi:1234@cluster0.cxgnxlm.mongodb.net/node-auth'
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: true })
     .then(result => {
         app.listen(port)
         console.log(port + ' is on!')
@@ -139,7 +148,6 @@ app.get('/sign-up', (req, res) => {
 })
 
 app.get('/my-suitcases', requireAuth, (req, res) => {
-    console.log("dude")
     res.sendFile(__dirname + '/client/my-suitcases/my-suitcases.html')
 })
 
@@ -189,10 +197,9 @@ app.post('/add-message', async (req, res) => {
     console.log(location, message, QR)
     let date = Date.now()
     try {
-        let suitcase = await SuitCase.findOne({ qr : QR})
+        let suitcase = await SuitCase.findOne({ _id : QR})
         suitcase.massages.push({date, location, message})
         suitcase.save()
-        console.log(suitcase)
         res.status(201).json({ status : "OK" })
     }
     catch (err) {
@@ -200,15 +207,16 @@ app.post('/add-message', async (req, res) => {
     }
 })
 
-app.get('/add-suitcase', async (req, res) => {
-    let QR = Math.random(10)
+app.post('/add-suitcase', async (req, res) => {
+    let suitcaseName = req.body.suitcaseName
 
     try {
         let decodedToken = jwt.verify(req.cookies.jwt, SECRET)
 
-        const suitcase  = await SuitCase.create({ qr : QR })
-        let doc =  await User.findOneAndUpdate({_id : decodedToken.id}, { $push : { suitcases: suitcase }}, { new : true })
-        console.log(suitcase)
+        const suitcase  = await SuitCase.create({ name : suitcaseName })
+        await User.findOneAndUpdate({_id : decodedToken.id}, { $push : { suitcases: suitcase }}, { new : true })
+        suitcase._doc.qr = await getQR(suitcase._id)
+        console.log('Added suitcase - ' + suitcase._id)
         res.status(201).json(suitcase)
     }
     catch (err) {
@@ -218,12 +226,12 @@ app.get('/add-suitcase', async (req, res) => {
 })
 
 app.post('/remove-suitcase', async (req, res) => {
-    let QR = req.body.QR
+    let suitcaseID = req.body.suitcaseID
 
     try {
         let user = await getUser(req.cookies.jwt)
         if(user !== null) {
-            let suitcase = await SuitCase.findOne({ qr : QR})
+            let suitcase = await SuitCase.findOne({ _id : suitcaseID})
             let doc =  await User.findOneAndUpdate({_id : user.id}, { $pull : { suitcases: suitcase.id } }, { new : true })
             if(user.suitcases.length - doc.suitcases.length === 1){
                 console.log("Suitcase deleted - " + suitcase.id)
@@ -242,8 +250,7 @@ app.post('/remove-suitcase', async (req, res) => {
 app.get('/get-suitcases', async (req, res) => {
     let user = await getUser(req.cookies.jwt)
     if(user !== null){
-        let suitcases = getCleanSuitcases(await user.populate('suitcases'))
-        console.log(suitcases)
+        let suitcases = await getCleanSuitcases(await user.populate('suitcases'))
         res.status(201).json(suitcases)
     }
     else {
@@ -254,3 +261,4 @@ app.get('/get-suitcases', async (req, res) => {
 app.use((req, res) => {
     res.status(404).sendFile(__dirname + '/client/not-found/not-found.html')
 })
+

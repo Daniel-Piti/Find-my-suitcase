@@ -38,3 +38,16 @@ body {
     width: 200px;
     border-radius: 15px;
   }
+  
+  .input-group {
+    width: 400px;
+  }
+
+  #add-suitcase {
+    border-radius: 0 10px 10px 0;
+    width: 150px;
+  }
+
+  #suitcase-name{
+    border-radius: 10px 0 0 10px;
+  }
